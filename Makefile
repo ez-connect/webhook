@@ -88,9 +88,11 @@ data:
 
 #: run the main package
 run: data
-	go build -o $(BUILD_DIR)/$(NAME) $(D_FLAGS) -buildmode plugin \
-		-o $(BUILD_DIR)/data/plugins/telegram.so \
-		plugin/telegram/telegram.go
+	@for arch in $(ARCH); do \
+		 GOARCH=$$arch  go build -o $(BUILD_DIR)/$(NAME) $(D_FLAGS) -buildmode plugin \
+			-o $(BUILD_DIR)/data/plugins/telegram-$$arch.so \
+			plugin/telegram/telegram.go; \
+	done; \
 
 	go build -o $(BUILD_DIR)/$(NAME) $(D_FLAGS)
 	cd $(BUILD_DIR); ./$(NAME) serve $(args);

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"plugin"
 
+	"freemind.com/webhook/plugin"
 	base "freemind.com/webhook/plugin"
 	"freemind.com/webhook/service/health"
 	"freemind.com/webhook/service/index"
@@ -21,7 +21,10 @@ const (
 	ServerPort = ":8080" // serve command on this port
 )
 
-var opts map[string]*Hook
+var (
+	opts    map[string]*Hook
+	plugins = map[string]plugin.Plugin{}
+)
 
 func ServeHTTP(config string) error {
 	if err := load(config); err != nil {
@@ -51,45 +54,32 @@ func load(config string) error {
 
 func addHook(id, so, config string) error {
 	var (
-		p       *plugin.Plugin
-		startFn plugin.Symbol
-		getFn   plugin.Symbol
-		postFn  plugin.Symbol
-		err     error
+		p   plugin.Plugin
+		err error
 	)
 
 	slog.Info("add hook", "id", id, "so", so, "config", config)
-	p, err = plugin.Open(so)
-	if err != nil {
+
+	if p, err = plugin.LoadPlugin(so); err != nil {
 		return err
 	}
 
-	startFn, err = p.Lookup("Start")
-	if err != nil {
+	if err = p.Start(config); err != nil {
 		return err
 	}
 
-	if err = startFn.(func(string) error)(config); err != nil {
-		return err
-	}
-
-	getFn, err = p.Lookup("Get")
-	if err != nil {
-		return err
-	}
-
-	postFn, err = p.Lookup("Post")
-	if err != nil {
-		return err
-	}
+	plugins[id] = p
 
 	pattern := fmt.Sprintf("/hooks/%s", id)
 	http.HandleFunc(pattern, func(w http.ResponseWriter, req *http.Request) {
+		var (
+			buf []byte
+			err error
+		)
 		slog.Info(fmt.Sprintf("%s %s", req.Method, pattern), "q", req.URL.Query().Encode())
 		switch req.Method {
 		case http.MethodGet:
-			buf, err := getFn.(func(*http.Request) ([]byte, error))(req)
-			if err != nil {
+			if buf, err = p.Get(req); err != nil {
 				handleError(w, err)
 				return
 			}
@@ -99,13 +89,12 @@ func addHook(id, so, config string) error {
 		case http.MethodPost:
 			defer req.Body.Close()
 
-			res, err := postFn.(func(*http.Request) ([]byte, error))(req)
-			if err != nil {
+			if buf, err = p.Post(req); err != nil {
 				handleError(w, err)
 				return
 			}
 
-			w.Write(res)
+			w.Write(buf)
 
 		case http.MethodDelete:
 			http.HandleFunc(pattern, nil)

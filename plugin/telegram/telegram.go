@@ -12,29 +12,44 @@ import (
 	"strings"
 	"text/template"
 
-	"freemind.com/webhook/plugin"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+
+	"freemind.com/webhook/plugin"
 )
 
-type Config struct {
+type TelegramPlugin struct {
+	plugin.Plugin
+}
+
+type Options struct {
 	BotToken string `yaml:"bot_token"`
 	Template string
+	Events   map[string]Event
+}
+
+type Event struct {
+	Enabled bool
+	Actions map[string]bool
 }
 
 var (
-	opts   *Config
+	opts   *Options
 	tpl    *template.Template
 	ctx    context.Context
 	cancel context.CancelFunc
 	b      *bot.Bot
 )
 
+func New() plugin.Plugin {
+	return &TelegramPlugin{}
+}
+
 // -----------------------------------------------------------------------------
 // Plugin implementation
 // -----------------------------------------------------------------------------
 
-func Start(config string) error {
+func (x *TelegramPlugin) Start(config string) error {
 	var err error
 
 	if err = plugin.ReadConfig(config, &opts); err != nil {
@@ -60,11 +75,15 @@ func Start(config string) error {
 	return err
 }
 
-func Get(req *http.Request) ([]byte, error) {
+func (x *TelegramPlugin) Stop() error {
+	return nil
+}
+
+func (x *TelegramPlugin) Get(req *http.Request) ([]byte, error) {
 	return []byte("Hello, world!"), nil
 }
 
-func Post(req *http.Request) ([]byte, error) {
+func (x *TelegramPlugin) Post(req *http.Request) ([]byte, error) {
 	chatID := req.URL.Query().Get("chat_id")
 	if chatID == "" {
 		return nil, errors.New("chat_id must be present in the query params")
@@ -102,4 +121,8 @@ func Post(req *http.Request) ([]byte, error) {
 	}
 
 	return json.Marshal(&m)
+}
+
+func (x *TelegramPlugin) Delete(req *http.Request) ([]byte, error) {
+	return nil, nil
 }
