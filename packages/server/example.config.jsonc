@@ -1,0 +1,22 @@
+{
+	// Example configuration for the webhook server (JSONC - comments allowed)
+	// Server configuration
+	"server": {
+		// Listening port for the Bun server
+		"port": 3000,
+		// Maximum number of plugin instances to keep in memory (LRU pool size)
+		"maxPoolSize": 10
+	},
+
+	// Hooks mapping: each key is the hook path (POST /:hook)
+	"hooks": {
+		// Echo hook - useful for testing. This plugin echoes back the request body.
+		"/echo": {
+			// Path to the plugin file (relative to packages/server)
+			// The example plugin implementation is located in the sibling package `plugin-echo`
+			"plugin": "../plugins/echo/src/index.ts",
+			// Optional plugin-specific options
+			"options": {}
+		}
+	}
+}

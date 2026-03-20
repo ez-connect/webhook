@@ -1,0 +1,16 @@
+{
+	"name": "@webhook/plugin-echo",
+	"module": "src/index.ts",
+	"type": "module",
+	"private": true,
+	"devDependencies": {
+		"@webhook/core": "workspace:*"
+	},
+	"scripts": {
+		"build": "bun build --target bun --minify --outdir dist src/index.ts ",
+		"fmt": "biome format --write",
+		"lint": "biome lint --write",
+		"typecheck": "tsc --noEmit",
+		"check": "bun run fmt; bun run lint; bun run typecheck"
+	}
+}

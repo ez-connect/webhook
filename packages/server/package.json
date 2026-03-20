@@ -1,0 +1,23 @@
+{
+	"name": "@webhook/server",
+	"version": "1.0.0",
+	"description": "Webhook server with plugin support",
+	"module": "src/index.ts",
+	"type": "module",
+	"private": true,
+	"bin": {
+		"webhook": "src/index.ts"
+	},
+	"scripts": {
+		"cli": "bun run src/index.ts",
+		"dev": "bun --watch src/index.ts serve -c example.config.jsonc",
+		"build": "bun build --target bun --minify --outdir dist src/index.ts ",
+		"fmt": "biome format --write",
+		"lint": "biome lint --write",
+		"typecheck": "tsc --noEmit",
+		"check": "bun run fmt; bun run lint; bun run typecheck"
+	},
+	"dependencies": {
+		"@webhook/core": "workspace:*"
+	}
+}
