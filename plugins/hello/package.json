@@ -1,0 +1,20 @@
+{
+	"name": "@webhook/plugin-echo",
+	"module": "src/index.ts",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"build": "asc src/index.ts --target release --use abort='' --outFile ../../build/plugins/hello.wasm",
+		"fmt": "biome format --write",
+		"lint": "biome lint --write",
+		"typecheck": "tsc --noEmit",
+		"check": "bun run fmt; bun run lint; bun run typecheck"
+	},
+	"devDependencies": {
+		"@assemblyscript/wasi-shim": "^0.1.0",
+		"assemblyscript": "^0.28.10"
+	},
+	"dependencies": {
+		"as-wasi": "^0.6.0"
+	}
+}

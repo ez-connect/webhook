@@ -1,0 +1,7 @@
+[server]
+hostname = "0.0.0.0"
+port = 3000
+
+[hooks]
+"/echo" = { plugin = "plugins/echo.wasm" }
+"/hello" = { plugin = "plugins/hello.wasm" }
