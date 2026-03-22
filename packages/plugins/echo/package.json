@@ -7,7 +7,7 @@
 		"@webhook/core": "workspace:*"
 	},
 	"scripts": {
-		"build": "bun build --target bun --minify --outdir dist src/index.ts ",
+		"build": "bun build --target bun --minify --outfile dist/echo.js src/index.ts ",
 		"fmt": "biome format --write",
 		"lint": "biome lint --write",
 		"typecheck": "tsc --noEmit",
